@@ -484,11 +484,20 @@ class UIManager {
     const localPlayer = roomState.players.find(p => p.id === localPlayerId);
     const isHost = localPlayer && localPlayer.isHost;
 
-    // Show Launch button only for host
+    // FIX 2: Show Launch button ONLY for host
     if (isHost) {
       this.btnStartMatch.classList.remove('hidden');
     } else {
       this.btnStartMatch.classList.add('hidden');
+    }
+
+    // FIX 9: Show Add AI Bot ONLY for host
+    if (this.btnAddBot) {
+      if (isHost) {
+        this.btnAddBot.classList.remove('hidden');
+      } else {
+        this.btnAddBot.classList.add('hidden');
+      }
     }
 
     // Leader penalty banner — if the host is penalized, disable Launch Match
@@ -507,34 +516,39 @@ class UIManager {
       if (this.btnStartMatch) this.btnStartMatch.disabled = false;
     }
 
+    // FIX 5: Deduplicate players by id before rendering
+    const seenIds = new Set();
+    const uniquePlayers = roomState.players.filter(p => {
+      if (seenIds.has(p.id)) return false;
+      seenIds.add(p.id);
+      return true;
+    });
+
     // Populate Rosters
     this.rosterAttackers.innerHTML = '';
     this.rosterDefenders.innerHTML = '';
 
-    roomState.players.forEach(p => {
+    uniquePlayers.forEach(p => {
       const isLocal = p.id === localPlayerId;
       const agent = CONSTANTS.AGENTS[p.agent];
       const card = document.createElement('div');
       card.className = `roster-card ${isLocal ? 'is-local' : ''}`;
 
-      // Bot switch arrows — only for party leader, only for bots
-      let botControls = '';
-      if (p.isBot && isHost) {
-        if (p.team === 'defenders') {
-          // Arrow faces LEFT → move bot to Attackers
-          botControls = `
-            <div class="bot-controls">
-              <button class="btn-bot-switch btn-switch-left" title="Move Bot to Attackers">← ATT</button>
-              <button class="btn-bot-remove" title="Remove Bot">✕</button>
-            </div>`;
-        } else {
-          // Arrow faces RIGHT → move bot to Defenders
-          botControls = `
-            <div class="bot-controls">
-              <button class="btn-bot-switch btn-switch-right" title="Move Bot to Defenders">DEF →</button>
-              <button class="btn-bot-remove" title="Remove Bot">✕</button>
-            </div>`;
-        }
+      // FIX 6+7: Build host-only controls for ALL players (bots + humans)
+      let hostControls = '';
+      if (isHost && !isLocal) {
+        // Switch arrow: bot & human alike
+        const switchLabel = p.team === 'defenders' ? '← ATT' : 'DEF →';
+        const switchCls = p.team === 'defenders' ? 'btn-switch-left' : 'btn-switch-right';
+        const removeCls = p.isBot ? 'btn-bot-remove' : 'btn-player-kick';
+        const removeTitle = p.isBot ? 'Remove Bot' : 'Kick Player';
+        hostControls = `
+          <div class="bot-controls">
+            <button class="btn-bot-switch ${switchCls}" title="Switch Team">${switchLabel}</button>
+            <button class="${removeCls}" title="${removeTitle}">✕</button>
+          </div>`;
+      } else if (isHost && isLocal) {
+        hostControls = `<div class="roster-status host-badge">HOST 👑</div>`;
       }
 
       card.innerHTML = `
@@ -545,22 +559,36 @@ class UIManager {
             <div class="roster-agent-name">${agent ? agent.name : 'Unknown'}</div>
           </div>
         </div>
-        ${botControls || `<div class="roster-status">${p.ready ? 'READY' : 'CHOOSING'}</div>`}
+        ${hostControls || `<div class="roster-status">${p.isHost ? 'HOST' : (p.ready ? 'READY' : 'WAITING')}</div>`}
       `;
 
-      // Wire bot control buttons after innerHTML is set
-      if (p.isBot && isHost) {
+      // Wire control buttons (host only, for others)
+      if (isHost && !isLocal) {
         const switchBtn = card.querySelector('.btn-bot-switch');
-        const removeBtn = card.querySelector('.btn-bot-remove');
         if (switchBtn) {
           switchBtn.addEventListener('click', () => {
             const targetTeam = p.team === 'defenders' ? 'attackers' : 'defenders';
-            if (this.onSwitchBotTeam) this.onSwitchBotTeam(p.id, targetTeam);
+            if (p.isBot) {
+              if (this.onSwitchBotTeam) this.onSwitchBotTeam(p.id, targetTeam);
+            } else {
+              if (this.onSwitchHumanTeam) this.onSwitchHumanTeam(p.id, targetTeam);
+            }
           });
         }
+
+        // Bot remove button
+        const removeBtn = card.querySelector('.btn-bot-remove');
         if (removeBtn) {
           removeBtn.addEventListener('click', () => {
             if (this.onRemoveBot) this.onRemoveBot(p.id);
+          });
+        }
+
+        // Human kick button
+        const kickBtn = card.querySelector('.btn-player-kick');
+        if (kickBtn) {
+          kickBtn.addEventListener('click', () => {
+            if (this.onKickPlayer) this.onKickPlayer(p.id);
           });
         }
       }

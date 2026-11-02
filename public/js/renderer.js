@@ -992,12 +992,20 @@ class GameRenderer {
 
   // Floor Grid & Tiles
   renderMapFloor(ctx) {
-    // Dark floor
-    ctx.fillStyle = '#0f1722';
+    // FIX 8: Metallic steel-grey floor with subtle glow (not pitch black)
+    ctx.fillStyle = '#1a2030';
     ctx.fillRect(0, 0, MAP_DATA.width, MAP_DATA.height);
 
-    // Tactical subtle grid
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
+    // Steel plate sheen overlay
+    const floorGrad = ctx.createLinearGradient(0, 0, MAP_DATA.width, MAP_DATA.height);
+    floorGrad.addColorStop(0, 'rgba(50, 65, 80, 0.18)');
+    floorGrad.addColorStop(0.5, 'rgba(70, 85, 100, 0.10)');
+    floorGrad.addColorStop(1, 'rgba(40, 55, 70, 0.18)');
+    ctx.fillStyle = floorGrad;
+    ctx.fillRect(0, 0, MAP_DATA.width, MAP_DATA.height);
+
+    // Tactical subtle grid (slightly more visible on lighter floor)
+    ctx.strokeStyle = 'rgba(100, 140, 180, 0.06)';
     ctx.lineWidth = 1;
     const gridSize = 100;
     ctx.beginPath();
@@ -1079,17 +1087,22 @@ class GameRenderer {
         ctx.lineWidth = 4;
         ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
       } else {
-        // Architectural Stone/Metal Wall
-        ctx.fillStyle = '#1c2833';
+        // FIX 8: Architectural Stone/Metal Wall — steel blue-grey (NOT dark grey)
+        ctx.fillStyle = '#2a3a4a';
         ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
 
-        // Wall top bevel
-        ctx.strokeStyle = '#2e4053';
+        // Top highlight bevel — gives 3D lifted look
+        ctx.fillStyle = 'rgba(100, 130, 160, 0.20)';
+        ctx.fillRect(wall.x, wall.y, wall.w, 3);
+        ctx.fillRect(wall.x, wall.y, 3, wall.h);
+
+        // Wall border — steel blue
+        ctx.strokeStyle = '#4a6580';
         ctx.lineWidth = 2;
         ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
 
-        // Shadow outline
-        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+        // Subtle shadow at bottom/right
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)';
         ctx.lineWidth = 1;
         ctx.strokeRect(wall.x - 1, wall.y - 1, wall.w + 2, wall.h + 2);
       }

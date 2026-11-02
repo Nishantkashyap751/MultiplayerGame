@@ -74,6 +74,16 @@ window.addEventListener('DOMContentLoaded', () => {
     network.removeBot(botId);
   };
 
+  // FIX 6: Kick human player (host only)
+  ui.onKickPlayer = (targetId) => {
+    network.kickPlayer(targetId);
+  };
+
+  // FIX 7: Switch human player team (host only)
+  ui.onSwitchHumanTeam = (targetId, team) => {
+    network.switchHumanTeam(targetId, team);
+  };
+
   // Confirm abandon match (after leaver warning modal)
   ui.onConfirmAbandon = () => {
     network.abandonMatch();

@@ -28,7 +28,7 @@ class TacticalGameEngine {
       this.spatialIndex = null;
     }
 
-    // Client Prediction State
+    // Client Prediction State — start at attacker spawn (will be overridden on first reconcile)
     this.predictedLocalPlayer = {
       x: 1100,
       y: 1400,
@@ -38,9 +38,18 @@ class TacticalGameEngine {
     };
     this.lastProcessedInput = 0;
     this.isPredicting = false;
+    this._predictedInitialized = false; // FIX 3: track if we synced from server yet
 
     // Setup Server Reconciliation Hook
     this.network.onServerReconcile = (authoritativePlayer, pendingInputs) => {
+      // FIX 3: On first reconcile, always snap predicted position to server position
+      // This ensures defenders (spawned at different coords) are correctly rendered
+      if (!this._predictedInitialized) {
+        this.predictedLocalPlayer.x = authoritativePlayer.x;
+        this.predictedLocalPlayer.y = authoritativePlayer.y;
+        this.isPredicting = false; // force re-init
+        this._predictedInitialized = true;
+      }
       this.reconcileServerState(authoritativePlayer, pendingInputs);
     };
 

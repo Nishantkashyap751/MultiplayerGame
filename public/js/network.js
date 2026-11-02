@@ -49,8 +49,18 @@ class NetworkManager {
     // 2. Player Updates in Lobby
     this.socket.on('player_joined', ({ player }) => {
       if (this.latestState) {
+        // FIX 5: Deduplicate — remove any existing entry with same id before pushing
+        this.latestState.players = this.latestState.players.filter(p => p.id !== player.id);
         this.latestState.players.push(player);
         ui.updateLobbyRoom(this.latestState, this.playerId);
+      }
+    });
+
+    // FIX 1: room_updated — full authoritative roster from server
+    this.socket.on('room_updated', (roomState) => {
+      this.latestState = roomState;
+      if (ui && ui.panelRoom && !ui.panelRoom.classList.contains('hidden')) {
+        ui.updateLobbyRoom(roomState, this.playerId);
       }
     });
 
@@ -131,6 +141,17 @@ class NetworkManager {
       this.latestState = gameState;
       ui.showLobbyScreen();
       ui.updateLobbyRoom(gameState, this.playerId);
+    });
+
+    // FIX 6: Kicked by host — return to dashboard
+    this.socket.on('kicked_from_room', ({ reason }) => {
+      this.roomCode = null;
+      this.latestState = null;
+      ui.showAnnouncement('REMOVED FROM ROOM', reason || 'Host removed you from the room.', 4000);
+      setTimeout(() => {
+        ui.showEntryPanel();
+        ui.showLobbyScreen();
+      }, 1500);
     });
 
     // Successfully left room, return to room code entry
@@ -349,6 +370,20 @@ class NetworkManager {
   removeBot(botId) {
     if (this.socket && this.roomCode) {
       this.socket.emit('remove_bot', { botId });
+    }
+  }
+
+  // FIX 6: Kick a human player (host only)
+  kickPlayer(targetId) {
+    if (this.socket && this.roomCode) {
+      this.socket.emit('kick_player', { targetId });
+    }
+  }
+
+  // FIX 7: Switch human player's team (host only)
+  switchHumanTeam(targetId, team) {
+    if (this.socket && this.roomCode) {
+      this.socket.emit('switch_human_team', { targetId, team });
     }
   }
 

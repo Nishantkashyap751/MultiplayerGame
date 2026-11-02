@@ -193,6 +193,8 @@ io.on('connection', (socket) => {
     });
 
     io.to(code).emit('player_joined', { player: sanitizePlayer(player) });
+    // FIX 1: Broadcast full room state so all clients see updated roster (fixes card visibility)
+    io.to(code).emit('room_updated', room.serialize());
     broadcastPublicRooms();
   });
 
@@ -274,6 +276,47 @@ io.on('connection', (socket) => {
       io.to(currentRoomCode).emit('player_left', { playerId: botId });
       broadcastPublicRooms();
     }
+  });
+
+  // 6d. Kick Human Player (Party leader only)
+  socket.on('kick_player', ({ targetId }) => {
+    if (!currentRoomCode) return;
+    const room = rooms.get(currentRoomCode);
+    if (!room || room.state !== 'lobby') return;
+    const caller = room.players.get(socket.id);
+    if (!caller || !caller.isHost) return;
+    if (targetId === socket.id) return; // host can't kick themselves
+
+    const target = room.players.get(targetId);
+    if (!target || target.isBot) return; // use remove_bot for bots
+
+    // Notify the kicked player, then remove them
+    const targetSocket = io.sockets.sockets.get(targetId);
+    if (targetSocket) {
+      targetSocket.emit('kicked_from_room', { reason: 'You were removed from the room by the host.' });
+      targetSocket.leave(currentRoomCode);
+    }
+
+    room.removePlayer(targetId);
+    io.to(currentRoomCode).emit('player_left', { playerId: targetId });
+    io.to(currentRoomCode).emit('room_updated', room.serialize());
+    broadcastPublicRooms();
+  });
+
+  // 6e. Switch Human Player Team (Party leader only)
+  socket.on('switch_human_team', ({ targetId, team }) => {
+    if (!currentRoomCode) return;
+    const room = rooms.get(currentRoomCode);
+    if (!room || room.state !== 'lobby') return;
+    const caller = room.players.get(socket.id);
+    if (!caller || !caller.isHost) return;
+
+    const target = room.players.get(targetId);
+    if (!target) return;
+
+    target.team = (team === 'attackers' || team === 'defenders') ? team : (target.team === 'attackers' ? 'defenders' : 'attackers');
+    io.to(currentRoomCode).emit('player_updated', { player: sanitizePlayer(target) });
+    io.to(currentRoomCode).emit('room_updated', room.serialize());
   });
 
   // 7. Start Game (Locked if leader is penalized)
