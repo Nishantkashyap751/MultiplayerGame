@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TACTICAL // PROTOCOL - 2D Tactical Multiplayer Shooter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=1.3">
+</head>
+<body>
+  <!-- Root Game Container -->
+  <div id="game-app">
+
+    <!-- Screen 1: Main Menu & Room Setup -->
+    <div id="screen-lobby" class="screen active">
+      <div class="lobby-backdrop"></div>
+      
+      <header class="lobby-header">
+        <div class="logo-box">
+          <div class="logo-icon">▲</div>
+          <div class="logo-text">
+            <span class="logo-brand">TACTICAL //</span>
+            <span class="logo-sub">PROTOCOL</span>
+          </div>
+        </div>
+        <div class="version-tag">PROTOTYPE BUILD // V1.0</div>
+      </header>
+
+      <div class="lobby-main-container">
+        <!-- Left: Join / Create Room Panel -->
+        <div class="panel lobby-panel" id="panel-entry">
+          <h2 class="panel-title">OPERATIVE PROTOCOL</h2>
+          
+          <div class="form-group">
+            <label for="input-player-name">CODENAME</label>
+            <input type="text" id="input-player-name" placeholder="Enter Agent Name..." maxlength="14" value="Viper_99">
+          </div>
+
+          <div class="action-buttons-stack">
+            <button id="btn-create-room" class="btn btn-primary">CREATE NEW ROOM</button>
+            <div class="or-divider"><span>OR JOIN CODE</span></div>
+            <div class="join-row">
+              <input type="text" id="input-room-code" placeholder="ROOM CODE" maxlength="6">
+              <button id="btn-join-room" class="btn btn-secondary">ENTER</button>
+            </div>
+          </div>
+
+          <!-- Tactical Controls Area (Hides when penalized to prevent layout shifts) -->
+          <div class="quick-tips" id="box-quick-tips">
+            <h4>TACTICAL CONTROLS</h4>
+            <ul>
+              <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> - Movement</li>
+              <li><kbd>SHIFT</kbd> - Silent Walk</li>
+              <li><kbd>CTRL</kbd> - Crouch (Accuracy)</li>
+              <li><kbd>MOUSE</kbd> - Aim & Shoot</li>
+              <li><kbd>R</kbd> - Reload (Guns Only)</li>
+              <li><kbd>B</kbd> - Buy Arsenal</li>
+              <li><kbd>Q</kbd> / <kbd>E</kbd> - Agent Abilities (2)</li>
+              <li><kbd>4</kbd> - Plant / Defuse Spike</li>
+              <li><kbd>TAB</kbd> - Scoreboard</li>
+              <li><kbd>⚙️</kbd> - Custom Keybinds</li>
+            </ul>
+          </div>
+
+          <!-- Red-Colored Penalty Warning Area that replaces Tactical Controls seamlessly -->
+          <div class="penalty-box-replace hidden" id="box-penalty-warning">
+            <div class="penalty-badge-red">⛔ PENALIZED // YOU HAVE TO WAIT</div>
+            <div class="penalty-timer-big" id="penalty-countdown-entry">10:00</div>
+            <div class="penalty-desc-text">
+              Matchmaking temporarily suspended for early abandon.<br>
+              Room creation locked until penalty expires.<br>
+              <em>(You can still join a squad via room code)</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side Panel: Public Lobbies / Active Rooms (Balances Dashboard Layout) -->
+        <div class="panel lobby-panel" id="panel-public-lobbies">
+          <div class="panel-header-row">
+            <div>
+              <h2 class="panel-title" style="margin-bottom: 4px;">ACTIVE SECTORS // PUBLIC LOBBIES</h2>
+              <p class="panel-subtitle">Live lobbies & ongoing matches available for quick deployment</p>
+            </div>
+            <button id="btn-refresh-lobbies" class="btn btn-sm btn-outline">REFRESH ⟳</button>
+          </div>
+
+          <div class="lobbies-list" id="public-rooms-list">
+            <!-- Dynamic room cards populated via Socket.io -->
+            <div class="empty-lobbies-msg">
+              <span style="font-size: 28px; opacity: 0.6;">📡</span>
+              <span>Scanning for active deployment sectors...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center / Right: Active Room Lobby (Hidden until joined) -->
+        <div class="panel lobby-panel hidden" id="panel-room">
+          <div class="room-header-bar">
+            <div class="room-header-left">
+              <button id="btn-room-back" class="btn btn-sm btn-outline btn-back">← LEAVE ROOM</button>
+              <div>
+                <span class="label-muted">ACTIVE SECTOR:</span>
+                <h2 id="display-room-code" class="room-code-tag">-----</h2>
+              </div>
+            </div>
+            <div class="room-actions">
+              <div id="leader-penalty-banner" class="leader-penalty-box hidden">
+                <span class="penalty-icon">⛔</span>
+                <span>PARTY LEADER PENALIZED: LOCKED (<strong id="leader-penalty-timer">10:00</strong>)</span>
+              </div>
+              <button id="btn-add-bot" class="btn btn-outline" title="Add tactical AI bot for solo testing or team balance">+ ADD AI BOT</button>
+              <button id="btn-start-match" class="btn btn-primary btn-glow hidden">LAUNCH MATCH</button>
+            </div>
+          </div>
+
+          <!-- Agent Selector Strip -->
+          <div class="agent-select-section">
+            <h3 class="section-title">SELECT AGENT ROSTER</h3>
+            <div class="agent-cards-grid" id="agent-cards-container">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+
+          <!-- Two Teams Roster -->
+          <div class="teams-container">
+            <!-- Attackers Team -->
+            <div class="team-column attackers-col">
+              <div class="team-header">
+                <div class="team-badge att-badge">ATTACKERS</div>
+                <button id="btn-join-attackers" class="btn btn-sm btn-team-switch">SWITCH TO ATT</button>
+              </div>
+              <div class="team-roster" id="roster-attackers">
+                <!-- Players list -->
+              </div>
+            </div>
+
+            <!-- Defenders Team -->
+            <div class="team-column defenders-col">
+              <div class="team-header">
+                <div class="team-badge def-badge">DEFENDERS</div>
+                <button id="btn-join-defenders" class="btn btn-sm btn-team-switch">SWITCH TO DEF</button>
+              </div>
+              <div class="team-roster" id="roster-defenders">
+                <!-- Players list -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2: In-Game Combat Canvas & Tactical HUD -->
+    <div id="screen-game" class="screen">
+      <!-- 2D Canvas -->
+      <canvas id="game-canvas"></canvas>
+
+      <!-- Combat UI Layer -->
+      <div id="game-hud">
+        
+        <!-- Top Match Header Bar -->
+        <header class="hud-top-bar">
+          <div class="hud-team-score hud-attackers">
+            <span class="hud-team-name">ATTACKERS</span>
+            <span id="hud-score-att" class="hud-score-number">0</span>
+          </div>
+
+          <div class="hud-center-timer-box">
+            <div id="hud-phase-label" class="hud-phase-tag">BUY PHASE</div>
+            <div id="hud-timer-display" class="hud-timer-digits">15</div>
+            <div id="hud-spike-status" class="hud-spike-indicator">
+              <span class="spike-icon">💣</span>
+              <span id="hud-spike-text">SPIKE READY</span>
+            </div>
+          </div>
+
+          <div class="hud-team-score hud-defenders">
+            <span id="hud-score-def" class="hud-score-number">0</span>
+            <span class="hud-team-name">DEFENDERS</span>
+          </div>
+        </header>
+
+        <!-- Top Left: Mini-Map -->
+        <div class="minimap-container">
+          <canvas id="minimap-canvas" width="220" height="160"></canvas>
+          <div class="minimap-label" id="current-callout">ASCENT // MID</div>
+        </div>
+
+        <!-- Top Right: Kill Feed -->
+        <div id="kill-feed" class="kill-feed-container"></div>
+
+        <!-- Center Announcements / Alerts -->
+        <div id="center-announcement" class="center-announcement-box hidden">
+          <h1 id="announcement-title">ROUND 1</h1>
+          <p id="announcement-subtitle">DEFEND THE SITES</p>
+          <button id="btn-return-lobby-announcement" class="btn btn-primary hidden" style="margin-top: 16px; pointer-events: auto;">RETURN TO SQUAD ROOM</button>
+        </div>
+
+        <!-- Center Interaction Prompt (Plant / Defuse) -->
+        <div id="interaction-prompt" class="interaction-prompt-box hidden">
+          <div class="progress-ring-container">
+            <svg class="progress-ring" width="80" height="80">
+              <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.2)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+              <circle id="interaction-progress-circle" class="progress-ring-fill" stroke="#ff4655" stroke-width="6" stroke-dasharray="213.6" stroke-dashoffset="213.6" fill="transparent" r="34" cx="40" cy="40"/>
+            </svg>
+            <div id="interaction-key-badge" class="prompt-key">4</div>
+          </div>
+          <div id="interaction-label" class="prompt-text">PLANTING SPIKE</div>
+        </div>
+
+        <!-- Buy Phase Notification Bar & Skip Button -->
+        <div id="buy-phase-banner" class="buy-phase-bar hidden">
+          <div class="buy-info">
+            <span class="buy-tag">PRESS [B] TO OPEN ARSENAL</span>
+            <span id="buy-credits-display" class="credits-tag">$800</span>
+          </div>
+          <button id="btn-skip-buy" class="btn btn-sm btn-outline">READY / SKIP BUY</button>
+        </div>
+
+        <!-- Bottom HUD: Health, Armor, Abilities, Weapons & Ammo -->
+        <footer class="hud-bottom-bar">
+          
+          <!-- Health & Shield -->
+          <div class="hud-vitals">
+            <div class="vital-group">
+              <div class="vital-bar-track">
+                <div id="hud-armor-bar" class="vital-bar-fill armor-fill" style="width: 0%;"></div>
+              </div>
+              <div class="vital-info">
+                <span class="vital-icon">🛡️</span>
+                <span id="hud-armor-val" class="vital-value">0</span>
+              </div>
+            </div>
+
+            <div class="vital-group">
+              <div class="vital-bar-track">
+                <div id="hud-hp-bar" class="vital-bar-fill hp-fill" style="width: 100%;"></div>
+              </div>
+              <div class="vital-info">
+                <span class="vital-icon">❤️</span>
+                <span id="hud-hp-val" class="vital-value">100</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agent Abilities -->
+          <div class="hud-abilities" id="hud-abilities-container">
+            <!-- Ability slots C, Q, E -->
+          </div>
+
+          <!-- Weapons & Ammo -->
+          <div class="hud-arsenal">
+            <div class="weapon-slots-strip">
+              <div class="w-slot" id="slot-primary" data-slot="primary"><span class="slot-num">1</span> <span class="slot-name">EMPTY</span></div>
+              <div class="w-slot active" id="slot-secondary" data-slot="secondary"><span class="slot-num">2</span> <span class="slot-name">CLASSIC</span></div>
+              <div class="w-slot" id="slot-melee" data-slot="melee"><span class="slot-num">3</span> <span class="slot-name">KNIFE</span></div>
+              <div class="w-slot" id="slot-spike" data-slot="spike"><span class="slot-num">4</span> <span class="slot-name">SPIKE</span></div>
+            </div>
+
+            <div class="ammo-display">
+              <div class="ammo-numbers">
+                <span id="hud-ammo-cur" class="ammo-cur">12</span>
+                <span class="ammo-sep">/</span>
+                <span id="hud-ammo-res" class="ammo-res">36</span>
+              </div>
+              <div id="hud-reload-tag" class="reload-tag hidden">RELOADING...</div>
+            </div>
+          </div>
+        </footer>
+
+        <!-- Screen Flash & Blind Effect Overlays -->
+        <div id="flash-overlay" class="flash-whiteout"></div>
+        <div id="near-sight-overlay" class="nearsight-vignette"></div>
+
+      </div>
+
+      <!-- Arsenal / Buy Phase Shop Modal (Toggled by B) -->
+      <div id="modal-shop" class="modal-overlay hidden">
+        <div class="shop-container">
+          <div class="shop-header">
+            <div class="shop-title">
+              <h2>TACTICAL ARSENAL</h2>
+              <span class="phase-countdown">BUY PHASE: <span id="shop-timer">15</span>s</span>
+            </div>
+            <div class="shop-funds">
+              <span class="label-muted">CURRENT CREDITS:</span>
+              <span id="shop-current-credits" class="funds-val">$800</span>
+            </div>
+            <button id="btn-close-shop" class="btn btn-close">✕</button>
+          </div>
+
+          <div class="shop-grid">
+            <!-- Sidearms -->
+            <div class="shop-category">
+              <h3 class="category-title">SIDEARMS</h3>
+              <div class="shop-items-list" id="shop-sidearms"></div>
+            </div>
+
+            <!-- Heavy / Rifles -->
+            <div class="shop-category">
+              <h3 class="category-title">PRIMARY WEAPONS</h3>
+              <div class="shop-items-list" id="shop-primaries"></div>
+            </div>
+
+            <!-- Shields & Utilities -->
+            <div class="shop-category">
+              <h3 class="category-title">ARMOR & ABILITIES</h3>
+              <div class="shop-items-list" id="shop-utilities"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scoreboard Tab Overlay -->
+      <div id="modal-scoreboard" class="scoreboard-overlay hidden">
+        <div class="scoreboard-box">
+          <h2 class="scoreboard-title">TACTICAL MATCH REPORT</h2>
+          
+          <div class="scoreboard-teams-split">
+            <!-- Attackers Table -->
+            <div class="sb-team-section">
+              <h3 class="sb-team-tag att-tag">ATTACKERS (<span id="sb-score-att">0</span>)</h3>
+              <table class="sb-table">
+                <thead>
+                  <tr><th>AGENT</th><th>NAME</th><th>K</th><th>D</th><th>SCORE</th><th>CREDITS</th></tr>
+                </thead>
+                <tbody id="sb-body-attackers"></tbody>
+              </table>
+            </div>
+
+            <!-- Defenders Table -->
+            <div class="sb-team-section">
+              <h3 class="sb-team-tag def-tag">DEFENDERS (<span id="sb-score-def">0</span>)</h3>
+              <table class="sb-table">
+                <thead>
+                  <tr><th>AGENT</th><th>NAME</th><th>K</th><th>D</th><th>SCORE</th><th>CREDITS</th></tr>
+                </thead>
+                <tbody id="sb-body-defenders"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Top-Right Floating Hamburger & Settings Menu -->
+    <div id="top-nav-utility">
+      <button id="btn-hamburger" class="btn-hamburger" title="Menu & Settings">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+
+      <!-- Dropdown Popover Menu -->
+      <div id="dropdown-menu" class="dropdown-popover hidden">
+        <div class="dropdown-header">OPERATIVE SYSTEM</div>
+        <button id="menu-opt-settings" class="dropdown-item">
+          <span class="item-icon">⚙️</span>
+          <span>SETTINGS & KEYBINDS</span>
+        </button>
+        <button id="menu-opt-leave" class="dropdown-item hidden">
+          <span class="item-icon">🚪</span>
+          <span>RETURN TO DASHBOARD</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Settings & Keybinds Modal -->
+    <div id="modal-settings" class="modal-overlay hidden">
+      <div class="settings-modal-box">
+        <div class="settings-header">
+          <div>
+            <h2 class="settings-title">⚙️ TACTICAL CONTROLS & KEYBINDS</h2>
+            <p class="settings-sub">Customize keybinds for your computer. Saved locally to your browser.</p>
+          </div>
+          <button id="btn-close-settings" class="btn btn-close">✕</button>
+        </div>
+
+        <div class="settings-body">
+          <div class="keybinds-container" id="keybinds-list">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <div class="settings-footer">
+          <button id="btn-reset-keybinds" class="btn btn-secondary">RESET TO DEFAULTS</button>
+          <button id="btn-save-keybinds" class="btn btn-primary">SAVE & CLOSE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaver / Match Abandon Warning Modal -->
+    <div id="modal-leaver-warning" class="modal-overlay hidden">
+      <div class="warning-modal-box">
+        <div class="warning-header">
+          <div class="warning-icon-box">⚠️</div>
+          <div>
+            <h2 class="warning-title">WARNING: ABANDON MATCH?</h2>
+            <p class="warning-sub">Leaving an active combat protocol will incur a matchmaking penalty.</p>
+          </div>
+        </div>
+
+        <div class="warning-body">
+          <div class="penalty-calc-card">
+            <div class="penalty-highlight-title">MATCHMAKING SUSPENSION:</div>
+            <div id="warning-penalty-duration" class="penalty-duration-tag">10 MINUTES</div>
+            <p class="penalty-details" id="warning-penalty-desc">
+              Match just started or in early rounds. Abandoning early severely handicaps your team. You cannot create or host matches for 10 minutes.
+            </p>
+          </div>
+          
+          <div class="penalty-rule-notes">
+            <ul>
+              <li>🔒 <strong>Host Locked:</strong> You cannot create or host any new match while penalized.</li>
+              <li>👥 <strong>Party Invite Allowed:</strong> You can still join matches if invited via another unpenalized leader's room code.</li>
+              <li>⏳ <strong>Team Impact:</strong> If a party leader is penalized, the entire party cannot launch until the timer expires.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="warning-footer">
+          <button id="btn-cancel-leave" class="btn btn-secondary">RESUME COMBAT</button>
+          <button id="btn-confirm-leave" class="btn btn-danger">CONFIRM & ABANDON MATCH</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Socket.io Library -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Game Scripts -->
+  <script src="shared/constants.js"></script>
+  <script src="shared/mapData.js"></script>
+  <script src="shared/quadtree.js"></script>
+  <script src="js/webglRenderer.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/fov.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/network.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

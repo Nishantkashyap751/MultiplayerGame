@@ -1,0 +1,31 @@
+{
+  "name": "multiplayer-game",
+  "version": "1.0.0",
+  "description": "Tactical 2D Multiplayer Shooter with 64Hz physics tick rate, Quadtree collision, client prediction, and Sova/Jett/Phoenix/Omen agents.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -c server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "multiplayer",
+    "game",
+    "tactical",
+    "shooter",
+    "socket.io",
+    "canvas",
+    "64hz"
+  ],
+  "author": "Nishant",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.3.0",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.16.0"
+  }
+}
