@@ -96,7 +96,22 @@ class NetworkManager {
 
     // 5. Round Events
     this.socket.on('round_started', (data) => {
-      ui.showAnnouncement(`ROUND ${this.latestState ? this.latestState.roundNumber : 1}`, 'ENGAGE TARGETS', 2500);
+      const isBuyPhase = !!data.isBuyPhase;
+      if (this.latestState) {
+        this.latestState.state = isBuyPhase ? 'buyPhase' : 'inRound';
+        if (data.roundNumber) this.latestState.roundNumber = data.roundNumber;
+        if (data.roundTimer !== undefined) this.latestState.roundTimer = data.roundTimer;
+      }
+      if (isBuyPhase) {
+        ui.showAnnouncement(`ROUND ${data.roundNumber || 1}`, 'BUY PHASE ACTIVE', 2500);
+      } else {
+        ui.showAnnouncement(`ROUND ${data.roundNumber || 1}`, 'ENGAGE TARGETS', 2500);
+        if (ui.modalShop) ui.modalShop.classList.add('hidden');
+        if (ui.buyPhaseBanner) ui.buyPhaseBanner.classList.add('hidden');
+      }
+      if (window.gameEngine && window.gameEngine.onRoundStarted) {
+        window.gameEngine.onRoundStarted(data);
+      }
       if (this.onRoundStarted) this.onRoundStarted(data);
     });
 
@@ -114,6 +129,13 @@ class NetworkManager {
     });
 
     this.socket.on('round_ended', (data) => {
+      if (this.latestState) {
+        this.latestState.state = 'roundEnded';
+        if (data.score) this.latestState.score = data.score;
+      }
+      if (ui.buyPhaseBanner) ui.buyPhaseBanner.classList.add('hidden');
+      if (ui.modalShop) ui.modalShop.classList.add('hidden');
+
       const localPlayer = this.latestState?.players.find(p => p.id === this.playerId);
       const isWinner = localPlayer && localPlayer.team === data.winner;
       

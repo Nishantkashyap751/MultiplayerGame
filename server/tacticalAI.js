@@ -349,11 +349,23 @@ class EliteTacticalAI {
       this.state = 'RETREAT';
     }
 
-    // Objective Override (Defenders defusing or Attackers planting)
+    // Objective Override (Defenders defusing, Attackers planting, or dropped spike recovery)
     if (room.spike.planted && bot.team === 'defenders') {
-      this.state = 'OBJECTIVE';
+      if (!visibleEnemy || Math.hypot(bot.x - visibleEnemy.x, bot.y - visibleEnemy.y) > 280) {
+        this.state = 'OBJECTIVE';
+      }
     } else if (!room.spike.planted && bot.team === 'attackers' && room.spike.carrierId === bot.id) {
-      this.state = 'OBJECTIVE';
+      if (!visibleEnemy || Math.hypot(bot.x - visibleEnemy.x, bot.y - visibleEnemy.y) > 280) {
+        this.state = 'OBJECTIVE';
+      }
+    } else if (!room.spike.planted && bot.team === 'attackers' && !room.spike.carrierId && (room.droppedSpike || room.spike.x !== null)) {
+      if (!visibleEnemy) {
+        this.state = 'OBJECTIVE';
+      }
+    } else if (room.spike.planted && bot.team === 'attackers') {
+      if (!visibleEnemy) {
+        this.state = 'OBJECTIVE';
+      }
     }
 
     // 3. State Execution
@@ -526,11 +538,11 @@ class EliteTacticalAI {
     const bot = this.bot;
     const spike = room.spike;
 
-    // Defender: Defuse Spike
+    // 1. Defender: Defuse Spike
     if (spike.planted && bot.team === 'defenders') {
       const d = Math.hypot(bot.x - spike.x, bot.y - spike.y);
       if (d <= 75) {
-        // Stop and Defuse!
+        // Stand and Defuse!
         bot.input.up = false;
         bot.input.down = false;
         bot.input.left = false;
@@ -547,12 +559,25 @@ class EliteTacticalAI {
       }
     }
 
-    // Attacker: Plant Spike at nearest site
+    // 2. Attacker: Plant Spike at nearest site
     else if (!spike.planted && bot.team === 'attackers' && spike.carrierId === bot.id) {
-      const site = MAP_DATA.plantSites[0]; // Site A or B
-      const inSite = bot.x >= site.x && bot.x <= site.x + site.w && bot.y >= site.y && bot.y <= site.y + site.h;
+      let nearestSite = MAP_DATA.plantSites[0];
+      let nearestDist = Math.hypot(bot.x - nearestSite.x, bot.y - nearestSite.y);
+
+      for (let i = 1; i < MAP_DATA.plantSites.length; i++) {
+        const site = MAP_DATA.plantSites[i];
+        const dist = Math.hypot(bot.x - site.x, bot.y - site.y);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearestSite = site;
+        }
+      }
+
+      const inSite = bot.x >= nearestSite.x && bot.x <= nearestSite.x + nearestSite.w &&
+                      bot.y >= nearestSite.y && bot.y <= nearestSite.y + nearestSite.h;
+
       if (inSite) {
-        // Plant Spike!
+        // Inside site — initiate Plant!
         bot.input.up = false;
         bot.input.down = false;
         bot.input.left = false;
@@ -562,9 +587,45 @@ class EliteTacticalAI {
       }
 
       if (this.path.length === 0 || this.pathRepathTimer <= 0) {
-        this.pathRepathTimer = 2.0;
-        this.path = findAStarPath(bot.x, bot.y, site.x + site.w / 2, site.y + site.h / 2);
+        this.pathRepathTimer = 1.5;
+        this.path = findAStarPath(bot.x, bot.y, nearestSite.x + nearestSite.w / 2, nearestSite.y + nearestSite.h / 2);
         this.currentWaypointIndex = 0;
+      }
+    }
+
+    // 3. Attacker: Pick up Dropped Spike
+    else if (!spike.planted && bot.team === 'attackers' && !spike.carrierId) {
+      const dropX = room.droppedSpike ? room.droppedSpike.x : spike.x;
+      const dropY = room.droppedSpike ? room.droppedSpike.y : spike.y;
+      if (dropX !== null && dropY !== null && dropX !== undefined) {
+        const d = Math.hypot(bot.x - dropX, bot.y - dropY);
+        if (d <= 55) {
+          spike.carrierId = bot.id;
+          room.droppedSpike = null;
+          return;
+        }
+        if (this.path.length === 0 || this.pathRepathTimer <= 0) {
+          this.pathRepathTimer = 1.0;
+          this.path = findAStarPath(bot.x, bot.y, dropX, dropY);
+          this.currentWaypointIndex = 0;
+        }
+      }
+    }
+
+    // 4. Attacker: Post-Plant Defense (Defend the planted spike)
+    else if (spike.planted && bot.team === 'attackers') {
+      const d = Math.hypot(bot.x - spike.x, bot.y - spike.y);
+      if (d > 220) {
+        if (this.path.length === 0 || this.pathRepathTimer <= 0) {
+          this.pathRepathTimer = 2.0;
+          this.path = findAStarPath(bot.x, bot.y, spike.x, spike.y);
+          this.currentWaypointIndex = 0;
+        }
+      } else {
+        // Hold tactical line of sight on spike
+        bot.angle = Math.atan2(spike.y - bot.y, spike.x - bot.x);
+        bot.input.angle = bot.angle;
+        bot.input.up = bot.input.down = bot.input.left = bot.input.right = false;
       }
     }
   }

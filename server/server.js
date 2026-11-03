@@ -13,6 +13,8 @@ const {
   setRoomsIO
 } = require('./rooms');
 const { initGameLoop } = require('./gameLoop');
+const { connectToDatabase } = require('./db');
+const MatchHistory = require('./models/MatchHistory');
 
 const app = express();
 const server = http.createServer(app);
@@ -96,6 +98,60 @@ function sanitizePlayer(p) {
 // Static routes
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/shared', express.static(path.join(__dirname, '../shared')));
+
+// Career/Match History API endpoint by playerId
+app.get('/api/match-history/:playerId', async (req, res) => {
+  try {
+    const { playerId } = req.params;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const matchHistory = await MatchHistory
+      .find({ playerId })
+      .sort({ matchDate: -1 })
+      .limit(limit);
+
+    res.json({ success: true, data: matchHistory });
+  } catch (error) {
+    console.error('Error fetching match history:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch match history' });
+  }
+});
+
+// Career/Match History API endpoint by playerName (persistent across browser reloads)
+app.get('/api/match-history/by-name/:playerName', async (req, res) => {
+  try {
+    const { playerName } = req.params;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const matchHistory = await MatchHistory
+      .find({ playerName: { $regex: new RegExp('^' + playerName.trim() + '$', 'i') } })
+      .sort({ matchDate: -1 })
+      .limit(limit);
+
+    res.json({ success: true, data: matchHistory });
+  } catch (error) {
+    console.error('Error fetching match history by name:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch match history' });
+  }
+});
+
+// Recent global match history
+app.get('/api/match-history-global', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const matchHistory = await MatchHistory
+      .find()
+      .sort({ matchDate: -1 })
+      .limit(limit);
+
+    res.json({ success: true, data: matchHistory });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch global match history' });
+  }
+});
+
+// Initialize database connection
+connectToDatabase();
 
 // Initialize high-precision 64Hz physics and netcode game loop
 const gameLoop = initGameLoop(io);
@@ -371,6 +427,7 @@ io.on('connection', (socket) => {
     const player = room.players.get(socket.id);
     if (player) {
       player.input = { ...player.input, ...inputData };
+      player.hasActedThisRound = true;
       if (inputData.seq) {
         player.lastProcessedInput = inputData.seq;
       }
@@ -384,6 +441,7 @@ io.on('connection', (socket) => {
     if (!room) return;
     const player = room.players.get(socket.id);
     if (player) {
+      player.hasActedThisRound = true;
       room.fireWeapon(player, player.currentSlot, angle);
     }
   });

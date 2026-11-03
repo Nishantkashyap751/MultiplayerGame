@@ -65,6 +65,7 @@ class UIManager {
     // Top Right Menu & Settings
     this.btnHamburger = document.getElementById('btn-hamburger');
     this.dropdownMenu = document.getElementById('dropdown-menu');
+    this.menuOptCareer = document.getElementById('menu-opt-career');
     this.menuOptSettings = document.getElementById('menu-opt-settings');
     this.menuOptLeave = document.getElementById('menu-opt-leave');
     this.modalSettings = document.getElementById('modal-settings');
@@ -73,8 +74,13 @@ class UIManager {
     this.btnResetKeybinds = document.getElementById('btn-reset-keybinds');
     this.keybindsList = document.getElementById('keybinds-list');
 
-    // Callbacks
-    this.onSkipBuy = null;
+    // Career Modal
+    this.btnNavCareer = document.getElementById('btn-nav-career');
+    this.btnTopCareer = document.getElementById('btn-top-career');
+    this.modalCareer = document.getElementById('modal-career');
+    this.btnCloseCareer = document.getElementById('btn-close-career');
+    this.careerStatsSummary = document.getElementById('career-stats-summary');
+    this.careerHistoryList = document.getElementById('career-history-list');
 
     // Modals
     this.modalShop = document.getElementById('modal-shop');
@@ -107,7 +113,6 @@ class UIManager {
     this.onSelectAgent = null;
     this.onSwitchTeam = null;
     this.onBuyItem = null;
-    this.onSkipBuy = null;
     this.onLeaveRoom = null;
     this.onLeaveMatch = null;
     this.onSwitchBotTeam = null;
@@ -222,6 +227,28 @@ class UIManager {
         if (window.network && window.network.latestState) {
           this.updateLobbyRoom(window.network.latestState, window.network.playerId);
         }
+      });
+    }
+
+    // Career Modal
+    if (this.menuOptCareer) {
+      this.menuOptCareer.addEventListener('click', () => {
+        this.showCareerModal();
+      });
+    }
+    if (this.btnNavCareer) {
+      this.btnNavCareer.addEventListener('click', () => {
+        this.showCareerModal();
+      });
+    }
+    if (this.btnTopCareer) {
+      this.btnTopCareer.addEventListener('click', () => {
+        this.showCareerModal();
+      });
+    }
+    if (this.btnCloseCareer) {
+      this.btnCloseCareer.addEventListener('click', () => {
+        this.modalCareer.classList.add('hidden');
       });
     }
 
@@ -886,6 +913,139 @@ class UIManager {
         this.centerAnnouncement.classList.add('hidden');
       }, duration);
     }
+  }
+
+  // Career / Match History Modal
+  async showCareerModal() {
+    this.modalCareer.classList.remove('hidden');
+    this.careerHistoryList.innerHTML = '<div class="loading-message">Retrieving operative career logs from Atlas...</div>';
+
+    const playerName = (this.inputPlayerName?.value?.trim()) || localStorage.getItem('tactical_codename') || 'Viper_99';
+    const playerId = window.network?.playerId;
+
+    // Try name first, then playerId, then global
+    const fetchUrl = playerName ? `/api/match-history/by-name/${encodeURIComponent(playerName)}?limit=25`
+      : (playerId ? `/api/match-history/${playerId}?limit=25` : '/api/match-history-global?limit=25');
+
+    fetch(fetchUrl)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.data && data.data.length > 0) {
+          this.renderCareerHistory(data.data);
+        } else {
+          // If no personal records yet, try fetching global recent matches to preview
+          fetch('/api/match-history-global?limit=20')
+            .then(r => r.json())
+            .then(globalData => {
+              if (globalData.success && globalData.data && globalData.data.length > 0) {
+                this.renderCareerHistory(globalData.data);
+              } else {
+                this.careerHistoryList.innerHTML = `
+                  <div class="empty-career-msg">
+                    <span style="font-size: 36px;">📡</span>
+                    <span style="font-weight: 700; letter-spacing: 1px;">NO RECENT COMBAT LOGS FOUND</span>
+                    <span style="font-size: 13px; color: var(--text-muted);">Complete a match in active sector to record performance to MongoDB Atlas.</span>
+                  </div>
+                `;
+                this.careerStatsSummary.innerHTML = '';
+              }
+            })
+            .catch(() => {
+              this.careerHistoryList.innerHTML = '<div class="empty-message">No matches recorded yet. Play a game to record stats!</div>';
+            });
+        }
+      })
+      .catch(error => {
+        console.warn('Career fetch error:', error);
+        this.careerHistoryList.innerHTML = '<div class="error-message">Database syncing. Play a match to log career history.</div>';
+      });
+  }
+
+  renderCareerHistory(matches) {
+    if (!matches || matches.length === 0) {
+      this.careerHistoryList.innerHTML = '<div class="empty-message">No match history available</div>';
+      this.careerStatsSummary.innerHTML = '';
+      return;
+    }
+
+    const totalMatches = matches.length;
+    const wins = matches.filter(m => m.isVictory).length;
+    const losses = totalMatches - wins;
+    const totalKills = matches.reduce((sum, m) => sum + (m.kills || 0), 0);
+    const totalDeaths = matches.reduce((sum, m) => sum + (m.deaths || 0), 0);
+    const totalAssists = matches.reduce((sum, m) => sum + (m.assists || 0), 0);
+    const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
+    const kdRatio = totalDeaths > 0 ? (totalKills / totalDeaths).toFixed(2) : totalKills.toFixed(2);
+
+    // Summary Top Cards
+    this.careerStatsSummary.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value">${totalMatches}</div>
+        <div class="stat-label">MATCHES</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: #00f0ff;">${wins}</div>
+        <div class="stat-label">VICTORIES</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: #ff4655;">${losses}</div>
+        <div class="stat-label">DEFEATS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: #ffde59;">${winRate}%</div>
+        <div class="stat-label">WIN RATE</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: #5eff8b;">${kdRatio}</div>
+        <div class="stat-label">K/D RATIO</div>
+      </div>
+    `;
+
+    // Valorant-Style Career Cards matching Image 3
+    this.careerHistoryList.innerHTML = matches.map(m => {
+      const isVic = m.isVictory;
+      const resultClass = isVic ? 'is-victory' : 'is-defeat';
+      const resultText = isVic ? 'VICTORY' : 'DEFEAT';
+      const agent = CONSTANTS.AGENTS[m.agent] || { name: m.agent || 'Agent', color: '#00f0ff' };
+      const attScore = m.finalScore ? (m.finalScore.attackers ?? 0) : 0;
+      const defScore = m.finalScore ? (m.finalScore.defenders ?? 0) : 0;
+      const myTeamScore = m.team === 'attackers' ? attScore : defScore;
+      const enemyScore = m.team === 'attackers' ? defScore : attScore;
+      const scoreDisplay = `${myTeamScore} - ${enemyScore}`;
+      const dateStr = m.matchDate ? new Date(m.matchDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Recent';
+
+      // Agent avatar initials or glyph
+      const agentInitial = (agent.name || 'A').charAt(0).toUpperCase();
+
+      return `
+        <div class="valorant-career-card ${resultClass}">
+          <div class="career-card-left">
+            <div class="agent-avatar-badge" style="border-color: ${agent.color || '#00f0ff'}; background: rgba(0,0,0,0.4);">
+              <span class="avatar-glyph" style="color: ${agent.color || '#fff'};">${agentInitial}</span>
+            </div>
+            <div class="player-agent-meta">
+              <div class="career-agent-name" style="color: ${agent.color || '#fff'};">${agent.name}</div>
+              <div class="career-player-name">${m.playerName || 'Operative'}</div>
+            </div>
+          </div>
+
+          <div class="career-card-kda">
+            <div class="kda-label">KDA <span class="kda-numbers">${m.kills || 0} / ${m.deaths || 0} / ${m.assists || 0}</span></div>
+            <div class="career-score-tag">SCORE ${m.score ? m.score.toLocaleString() : (m.kills || 0) * 150}</div>
+          </div>
+
+          <div class="career-card-result">
+            <div class="outcome-title ${resultClass}">${resultText}</div>
+            <div class="outcome-rounds">${scoreDisplay}</div>
+          </div>
+
+          <div class="career-card-right">
+            <div class="map-badge">ASCENT // MID</div>
+            <div class="date-badge">${dateStr}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   // Tab Scoreboard Data

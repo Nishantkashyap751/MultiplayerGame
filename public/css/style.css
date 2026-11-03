@@ -2490,3 +2490,280 @@ button:disabled {
   font-size: 11px;
   letter-spacing: 1px;
 }
+
+/* =========================================================================
+   VALORANT-STYLE CAREER STATISTICS & MATCH HISTORY MODAL (Matching Image 3)
+   ========================================================================= */
+.career-modal-box {
+  background: #0f1923;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 240, 255, 0.1);
+  border-radius: 6px;
+  width: 900px;
+  max-width: 95vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.career-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  background: rgba(20, 30, 45, 0.6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.career-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 2px;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.career-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+  letter-spacing: 0.5px;
+}
+
+.career-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.career-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: rgba(22, 34, 48, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 12px 16px;
+  text-align: center;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.career-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Valorant-Style Card Strip */
+.valorant-career-card {
+  display: grid;
+  grid-template-columns: 200px 180px 180px 1fr;
+  align-items: center;
+  padding: 14px 20px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, background 0.15s ease;
+  border-left: 5px solid #888;
+}
+
+.valorant-career-card:hover {
+  transform: translateX(4px);
+}
+
+.valorant-career-card.is-victory {
+  background: linear-gradient(90deg, rgba(0, 180, 216, 0.18) 0%, rgba(20, 35, 50, 0.75) 45%, rgba(15, 25, 35, 0.95) 100%);
+  border-left-color: #00f0ff;
+  border-top: 1px solid rgba(0, 240, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+  border-right: 1px solid rgba(0, 240, 255, 0.15);
+}
+
+.valorant-career-card.is-defeat {
+  background: linear-gradient(90deg, rgba(230, 57, 70, 0.18) 0%, rgba(35, 20, 30, 0.75) 45%, rgba(15, 25, 35, 0.95) 100%);
+  border-left-color: #ff4655;
+  border-top: 1px solid rgba(255, 70, 85, 0.15);
+  border-bottom: 1px solid rgba(255, 70, 85, 0.15);
+  border-right: 1px solid rgba(255, 70, 85, 0.15);
+}
+
+.career-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.agent-avatar-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  border: 2px solid #00f0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.avatar-glyph {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.player-agent-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.career-agent-name {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.career-player-name {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.career-card-kda {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kda-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.kda-numbers {
+  color: #fff;
+  font-size: 15px;
+}
+
+.career-score-tag {
+  font-size: 12px;
+  color: #5eff8b;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.career-card-result {
+  display: flex;
+  flex-direction: column;
+}
+
+.outcome-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  line-height: 1;
+}
+
+.outcome-title.is-victory {
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.outcome-title.is-defeat {
+  color: #ff4655;
+  text-shadow: 0 0 10px rgba(255, 70, 85, 0.5);
+}
+
+.outcome-rounds {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ece8e1;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.career-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.map-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ece8e1;
+  letter-spacing: 1px;
+}
+
+.date-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.empty-career-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 20px;
+  color: #ece8e1;
+  text-align: center;
+}
+
+/* Top Navigation Career Buttons */
+.nav-top-career-btn {
+  background: rgba(15, 25, 35, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  color: #00f0ff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(8px);
+}
+
+.nav-top-career-btn:hover {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: #00f0ff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+}
+
+#top-nav-utility {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

@@ -44,9 +44,11 @@ class GameRenderer {
     this.canvas.height = window.innerHeight;
   }
 
-  // Camera update with smooth damping & aim peek offset
-  updateCamera(player, mouseX, mouseY) {
+  // Camera update with framerate-independent spring-arm damping & aim peek offset
+  updateCamera(player, mouseX, mouseY, dt = 0.016) {
     if (!player) return;
+
+    const frameDt = Math.max(0.001, Math.min(0.1, dt));
 
     // Small camera look-ahead towards crosshair for tactical feel
     const screenCenterX = this.canvas.width / 2;
@@ -57,9 +59,10 @@ class GameRenderer {
     this.camera.targetX = player.x + offsetX;
     this.camera.targetY = player.y + offsetY;
 
-    // Smooth Lerp
-    this.camera.x += (this.camera.targetX - this.camera.x) * 0.12;
-    this.camera.y += (this.camera.targetY - this.camera.y) * 0.12;
+    // Framerate-independent exponential spring damping (eliminates 144Hz+ jitter)
+    const blend = 1 - Math.exp(-14 * frameDt);
+    this.camera.x += (this.camera.targetX - this.camera.x) * blend;
+    this.camera.y += (this.camera.targetY - this.camera.y) * blend;
 
     // Camera shake (from spike detonation / heavy blasts)
     if (this.screenShake > 0) {
@@ -440,13 +443,13 @@ class GameRenderer {
   }
 
   // Main Render Frame
-  render(gameState, localPlayerId, mousePos) {
+  render(gameState, localPlayerId, mousePos, frameDt = 0.016) {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     const localPlayer = gameState.players.find(p => p.id === localPlayerId);
     if (localPlayer) {
-      this.updateCamera(localPlayer, mousePos.screenX, mousePos.screenY);
+      this.updateCamera(localPlayer, mousePos.screenX, mousePos.screenY, frameDt);
     }
 
     // Apply Camera Transform
@@ -992,20 +995,12 @@ class GameRenderer {
 
   // Floor Grid & Tiles
   renderMapFloor(ctx) {
-    // FIX 8: Metallic steel-grey floor with subtle glow (not pitch black)
-    ctx.fillStyle = '#1a2030';
+    // Dark tactical floor matching UI arena specification
+    ctx.fillStyle = '#0f1722';
     ctx.fillRect(0, 0, MAP_DATA.width, MAP_DATA.height);
 
-    // Steel plate sheen overlay
-    const floorGrad = ctx.createLinearGradient(0, 0, MAP_DATA.width, MAP_DATA.height);
-    floorGrad.addColorStop(0, 'rgba(50, 65, 80, 0.18)');
-    floorGrad.addColorStop(0.5, 'rgba(70, 85, 100, 0.10)');
-    floorGrad.addColorStop(1, 'rgba(40, 55, 70, 0.18)');
-    ctx.fillStyle = floorGrad;
-    ctx.fillRect(0, 0, MAP_DATA.width, MAP_DATA.height);
-
-    // Tactical subtle grid (slightly more visible on lighter floor)
-    ctx.strokeStyle = 'rgba(100, 140, 180, 0.06)';
+    // Tactical subtle grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
     ctx.lineWidth = 1;
     const gridSize = 100;
     ctx.beginPath();
@@ -1087,22 +1082,17 @@ class GameRenderer {
         ctx.lineWidth = 4;
         ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
       } else {
-        // FIX 8: Architectural Stone/Metal Wall — steel blue-grey (NOT dark grey)
-        ctx.fillStyle = '#2a3a4a';
+        // Architectural Stone/Metal Wall (matching arena specification)
+        ctx.fillStyle = '#1c2833';
         ctx.fillRect(wall.x, wall.y, wall.w, wall.h);
 
-        // Top highlight bevel — gives 3D lifted look
-        ctx.fillStyle = 'rgba(100, 130, 160, 0.20)';
-        ctx.fillRect(wall.x, wall.y, wall.w, 3);
-        ctx.fillRect(wall.x, wall.y, 3, wall.h);
-
-        // Wall border — steel blue
-        ctx.strokeStyle = '#4a6580';
+        // Wall top bevel
+        ctx.strokeStyle = '#2e4053';
         ctx.lineWidth = 2;
         ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
 
-        // Subtle shadow at bottom/right
-        ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+        // Shadow outline
+        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
         ctx.lineWidth = 1;
         ctx.strokeRect(wall.x - 1, wall.y - 1, wall.w + 2, wall.h + 2);
       }

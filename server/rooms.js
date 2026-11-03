@@ -2,6 +2,7 @@ const CONSTANTS = require('../shared/constants');
 const { MAP_DATA, getWallSegments } = require('../shared/mapData');
 const { AABB, Quadtree } = require('./quadtree');
 const { EliteTacticalAI } = require('./tacticalAI');
+const MatchHistory = require('./models/MatchHistory');
 
 let io = null;
 function setRoomsIO(ioInstance) {
@@ -578,6 +579,10 @@ class GameRoom {
     // Check Match Win (first team to 5 rounds total wins match)
     if (this.score[winnerTeam] >= CONSTANTS.ROUNDS_TO_WIN) {
       this.state = 'matchEnded';
+
+      // Save match history to MongoDB for all players
+      this.saveMatchHistory(winnerTeam);
+
       io.to(this.code).emit('match_ended', {
         winner: winnerTeam,
         score: this.score
@@ -639,6 +644,35 @@ class GameRoom {
     }, CONSTANTS.ROUND_END_DELAY * 1000);
   }
 
+  // Save match history to MongoDB for career tracking
+  async saveMatchHistory(winnerTeam) {
+    try {
+      for (const [, p] of this.players) {
+        if (p.isBot) continue; // Skip bots
+
+        const matchRecord = new MatchHistory({
+          playerId: p.id,
+          playerName: p.name,
+          agent: p.agent,
+          team: p.team,
+          isVictory: p.team === winnerTeam,
+          kills: p.stats.kills || 0,
+          deaths: p.stats.deaths || 0,
+          assists: p.stats.assists || 0,
+          score: p.stats.score || 0,
+          finalScore: this.score,
+          roundNumber: this.roundNumber,
+          roomCode: this.code
+        });
+
+        await matchRecord.save();
+      }
+      console.log(`✅ Match history saved for room ${this.code}`);
+    } catch (error) {
+      console.error('❌ Error saving match history:', error);
+    }
+  }
+
   resetToLobby() {
     this.state = 'lobby';
     this.roundNumber = 0;
@@ -666,7 +700,8 @@ class GameRoom {
         this.state = 'inRound';
         this.roundTimer = CONSTANTS.ROUND_TIME;
         io.to(this.code).emit('round_started', {
-          roundTimer: this.roundTimer
+          roundTimer: this.roundTimer,
+          roundNumber: this.roundNumber
         });
       }
     } else if (this.state === 'inRound') {
@@ -1716,3 +1751,4 @@ module.exports = {
   getLineSegmentIntersection,
   resolvePlayerWallCollision
 };
+

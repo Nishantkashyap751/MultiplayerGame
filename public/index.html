@@ -355,6 +355,10 @@
       <!-- Dropdown Popover Menu -->
       <div id="dropdown-menu" class="dropdown-popover hidden">
         <div class="dropdown-header">OPERATIVE SYSTEM</div>
+        <button id="menu-opt-career" class="dropdown-item">
+          <span class="item-icon">📊</span>
+          <span>CAREER</span>
+        </button>
         <button id="menu-opt-settings" class="dropdown-item">
           <span class="item-icon">⚙️</span>
           <span>SETTINGS & KEYBINDS</span>
@@ -422,6 +426,29 @@
         <div class="warning-footer">
           <button id="btn-cancel-leave" class="btn btn-secondary">RESUME COMBAT</button>
           <button id="btn-confirm-leave" class="btn btn-danger">CONFIRM & ABANDON MATCH</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Career / Match History Modal -->
+    <div id="modal-career" class="modal-overlay hidden">
+      <div class="career-modal-box">
+        <div class="career-header">
+          <div>
+            <h2 class="career-title">📊 CAREER STATISTICS</h2>
+            <p class="career-sub">Match history and performance metrics</p>
+          </div>
+          <button id="btn-close-career" class="btn btn-close">✕</button>
+        </div>
+
+        <div class="career-body">
+          <div class="career-stats-summary" id="career-stats-summary">
+            <!-- Stats summary will be populated dynamically -->
+          </div>
+
+          <div class="career-history-list" id="career-history-list">
+            <div class="loading-message">Loading match history...</div>
+          </div>
         </div>
       </div>
     </div>
