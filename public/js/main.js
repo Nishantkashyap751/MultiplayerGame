@@ -60,10 +60,6 @@ window.addEventListener('DOMContentLoaded', () => {
     network.buyItem(category, itemId);
   };
 
-  ui.onSkipBuy = () => {
-    network.skipBuyPhase();
-  };
-
   // Bot team switching (party leader only)
   ui.onSwitchBotTeam = (botId, team) => {
     network.switchBotTeam(botId, team);
@@ -206,6 +202,16 @@ window.addEventListener('DOMContentLoaded', () => {
   // 4. Connect Network Callbacks
   network.onBulletFired = (tracer) => {
     renderer.addTracer(tracer.from, tracer.to, tracer.weapon, tracer.headshot);
+  };
+
+  network.onMatchEnded = (data) => {
+    // Automatically return to lobby after 5.5 seconds (matching server delay)
+    setTimeout(() => {
+      if (network.latestState && network.latestState.state === 'matchEnded') {
+        network.returnToLobby();
+        ui.showLobbyScreen();
+      }
+    }, 5500);
   };
 
   // 5. Connect to Socket.io Server

@@ -594,12 +594,6 @@ class NetworkManager {
     }
   }
 
-  skipBuyPhase() {
-    if (this.socket && this.roomCode) {
-      this.socket.emit('skip_buy_phase');
-    }
-  }
-
   leaveRoom() {
     if (this.socket) {
       this.socket.emit('leave_room');

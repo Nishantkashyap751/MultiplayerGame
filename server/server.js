@@ -70,7 +70,6 @@ function sanitizePlayer(p) {
     name: p.name,
     team: p.team,
     agent: p.agent,
-    ready: p.ready,
     isHost: p.isHost,
     isBot: p.isBot,
     x: p.x !== undefined ? Math.round(p.x) : 0,
@@ -222,19 +221,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 5. Toggle Ready
-  socket.on('toggle_ready', () => {
-    if (!currentRoomCode) return;
-    const room = rooms.get(currentRoomCode);
-    if (!room || room.state !== 'lobby') return;
-    const player = room.players.get(socket.id);
-    if (player) {
-      player.ready = !player.ready;
-      io.to(currentRoomCode).emit('player_updated', { player: sanitizePlayer(player) });
-    }
-  });
-
-  // 6. Add AI Bot (Party leader only)
+  // 5. Add AI Bot (Party leader only)
   socket.on('add_bot', ({ team }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -247,7 +234,7 @@ io.on('connection', (socket) => {
     broadcastPublicRooms();
   });
 
-  // 6b. Switch Bot Team (Party leader only)
+  // 6. Switch Bot Team (Party leader only)
   socket.on('switch_bot_team', ({ botId, team }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -262,7 +249,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 6c. Remove Bot (Party leader only)
+  // 7. Remove Bot (Party leader only)
   socket.on('remove_bot', ({ botId }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -278,7 +265,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 6d. Kick Human Player (Party leader only)
+  // 8. Kick Human Player (Party leader only)
   socket.on('kick_player', ({ targetId }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -303,7 +290,7 @@ io.on('connection', (socket) => {
     broadcastPublicRooms();
   });
 
-  // 6e. Switch Human Player Team (Party leader only)
+  // 9. Switch Human Player Team (Party leader only)
   socket.on('switch_human_team', ({ targetId, team }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -319,7 +306,7 @@ io.on('connection', (socket) => {
     io.to(currentRoomCode).emit('room_updated', room.serialize());
   });
 
-  // 7. Start Game (Locked if leader is penalized)
+  // 10. Start Game (Locked if leader is penalized)
   socket.on('start_game', () => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -345,7 +332,7 @@ io.on('connection', (socket) => {
     broadcastPublicRooms();
   });
 
-  // 7b. Abandon Match & Incur Leaver Penalty
+  // 11. Abandon Match & Incur Leaver Penalty
   socket.on('abandon_match', () => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -376,7 +363,7 @@ io.on('connection', (socket) => {
     broadcastPublicRooms();
   });
 
-  // 8. Player Movement Input with Client-Side Sequence Tracking
+  // 12. Player Movement Input with Client-Side Sequence Tracking
   socket.on('player_input', (inputData) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -390,7 +377,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 9. Fire Weapon
+  // 13. Fire Weapon
   socket.on('fire_weapon', ({ angle }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -401,7 +388,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 10. Reload Weapon
+  // 14. Reload Weapon
   socket.on('reload_weapon', () => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -412,7 +399,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 11. Switch Weapon Slot ('primary', 'secondary', 'melee', 'spike')
+  // 15. Switch Weapon Slot ('primary', 'secondary', 'melee', 'spike')
   socket.on('switch_slot', ({ slot }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -423,7 +410,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 12. Buy Item (Weapons, Armor, Abilities)
+  // 16. Buy Item (Weapons, Armor, Abilities)
   socket.on('buy_item', ({ category, itemId }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -464,7 +451,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 13. Use Agent Ability
+  // 17. Use Agent Ability
   socket.on('use_ability', ({ abilityKey, targetX, targetY }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -475,7 +462,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 14. Plant / Defuse Spike
+  // 18. Plant / Defuse Spike
   socket.on('spike_action_start', ({ action }) => {
     if (!currentRoomCode) return;
     const room = rooms.get(currentRoomCode);
@@ -504,15 +491,7 @@ io.on('connection', (socket) => {
     if (room.spike.defuserId === socket.id) room.spike.defuserId = null;
   });
 
-  // 15. Fast Forward / Skip Buy Phase (convenience for testing)
-  socket.on('skip_buy_phase', () => {
-    if (!currentRoomCode) return;
-    const room = rooms.get(currentRoomCode);
-    if (!room || room.state !== 'buyPhase') return;
-    room.roundTimer = 0.5;
-  });
-
-  // 16. Leave Room / Return to Dashboard
+  // 19. Leave Room / Return to Dashboard
   socket.on('leave_room', () => {
     if (currentRoomCode) {
       const room = rooms.get(currentRoomCode);
@@ -530,7 +509,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 17. Return Room to Lobby Dashboard
+  // 20. Return Room to Lobby Dashboard
   socket.on('return_to_lobby', () => {
     if (currentRoomCode) {
       const room = rooms.get(currentRoomCode);
@@ -541,7 +520,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 18. Disconnect
+  // 21. Disconnect
   socket.on('disconnect', () => {
     if (currentRoomCode) {
       const room = rooms.get(currentRoomCode);

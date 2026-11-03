@@ -57,7 +57,6 @@ class UIManager {
     this.interactionLabel = document.getElementById('interaction-label');
     this.buyPhaseBanner = document.getElementById('buy-phase-banner');
     this.buyCreditsDisplay = document.getElementById('buy-credits-display');
-    this.btnSkipBuy = document.getElementById('btn-skip-buy');
 
     // Flash & Blind Overlays
     this.flashOverlay = document.getElementById('flash-overlay');
@@ -73,6 +72,9 @@ class UIManager {
     this.btnSaveKeybinds = document.getElementById('btn-save-keybinds');
     this.btnResetKeybinds = document.getElementById('btn-reset-keybinds');
     this.keybindsList = document.getElementById('keybinds-list');
+
+    // Callbacks
+    this.onSkipBuy = null;
 
     // Modals
     this.modalShop = document.getElementById('modal-shop');
@@ -127,13 +129,6 @@ class UIManager {
     if (this.btnCloseShop) {
       this.btnCloseShop.addEventListener('click', () => {
         this.modalShop.classList.add('hidden');
-      });
-    }
-
-    // Skip buy phase button
-    if (this.btnSkipBuy) {
-      this.btnSkipBuy.addEventListener('click', () => {
-        if (this.onSkipBuy) this.onSkipBuy();
       });
     }
 
@@ -559,7 +554,7 @@ class UIManager {
             <div class="roster-agent-name">${agent ? agent.name : 'Unknown'}</div>
           </div>
         </div>
-        ${hostControls || `<div class="roster-status">${p.isHost ? 'HOST' : (p.ready ? 'READY' : 'WAITING')}</div>`}
+        ${hostControls || `<div class="roster-status">${p.isHost ? 'HOST' : 'WAITING'}</div>`}
       `;
 
       // Wire control buttons (host only, for others)
@@ -885,11 +880,10 @@ class UIManager {
       this.btnReturnLobbyAnnouncement.classList.add('hidden');
     }
 
+    // Always hide after duration (server handles the actual game state transition)
     if (duration > 0) {
       setTimeout(() => {
-        if (!showReturnButton) {
-          this.centerAnnouncement.classList.add('hidden');
-        }
+        this.centerAnnouncement.classList.add('hidden');
       }, duration);
     }
   }

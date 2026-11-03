@@ -170,7 +170,6 @@ class GameRoom {
       name: name || `Agent ${existingCount + 1}`,
       team: team,
       agent: agent,
-      ready: isHost,
       isHost: isHost,
       isBot: false,
       
@@ -236,7 +235,6 @@ class GameRoom {
       name: `Bot ${botId.replace('bot_', '')}`,
       team: team,
       agent: randomAgent,
-      ready: true,
       isHost: false,
       isBot: true,
 
@@ -295,7 +293,6 @@ class GameRoom {
       for (const [, p] of this.players) {
         if (!p.isBot) {
           p.isHost = true;
-          p.ready = true;
           break;
         }
       }
@@ -647,7 +644,6 @@ class GameRoom {
     this.roundNumber = 0;
     this.score = { attackers: 0, defenders: 0 };
     for (const [, p] of this.players) {
-      p.ready = p.isHost;
       p.health = 100;
       p.isAlive = true;
       p.credits = CONSTANTS.STARTING_CREDITS;
@@ -1576,7 +1572,6 @@ class GameRoom {
         name: p.name,
         team: p.team,
         agent: p.agent,
-        ready: p.ready,
         isHost: p.isHost,
         isBot: p.isBot,
         x: Math.round(p.x),
