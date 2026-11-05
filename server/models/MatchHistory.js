@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const MatchHistorySchema = new mongoose.Schema({
   playerId: {
     type: String,
-    required: true,
-    index: true
+    required: true
   },
   playerName: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   agent: {
     type: String,
@@ -49,7 +49,8 @@ const MatchHistorySchema = new mongoose.Schema({
   },
   matchDate: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+    index: true
   },
   roomCode: {
     type: String
@@ -58,7 +59,7 @@ const MatchHistorySchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for efficient queries
-MatchHistorySchema.index({ playerId: 1, matchDate: -1 });
+// Compound index for efficient queries by playerName and date
+MatchHistorySchema.index({ playerName: 1, matchDate: -1 });
 
 module.exports = mongoose.model('MatchHistory', MatchHistorySchema);

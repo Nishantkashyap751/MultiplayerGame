@@ -601,12 +601,6 @@ class GameRoom {
     if (this.roundNumber === (CONSTANTS.FIRST_HALF_ROUNDS || 4)) {
       this.isHalftime = true;
 
-      // Swap team scores so scores track with each roster
-      const prevAttScore = this.score.attackers;
-      const prevDefScore = this.score.defenders;
-      this.score.attackers = prevDefScore;
-      this.score.defenders = prevAttScore;
-
       // Swap all player team assignments and reset round weapons & economy for second half
       for (const [, p] of this.players) {
         p.team = (p.team === 'attackers') ? 'defenders' : 'attackers';

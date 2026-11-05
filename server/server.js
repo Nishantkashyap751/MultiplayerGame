@@ -99,16 +99,19 @@ function sanitizePlayer(p) {
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/shared', express.static(path.join(__dirname, '../shared')));
 
-// Career/Match History API endpoint by playerId
-app.get('/api/match-history/:playerId', async (req, res) => {
+// Career/Match History API endpoint by playerName (persistent across browser reloads)
+app.get('/api/match-history/:playerName', async (req, res) => {
   try {
-    const { playerId } = req.params;
+    const { playerName } = req.params;
     const limit = parseInt(req.query.limit) || 20;
 
+    // Optimized query with index on playerName and matchDate
     const matchHistory = await MatchHistory
-      .find({ playerId })
+      .find({ playerName: playerName.trim() })
+      .select('agent team isVictory kills deaths assists score finalScore roundNumber matchDate roomCode')
       .sort({ matchDate: -1 })
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Use lean() for faster queries
 
     res.json({ success: true, data: matchHistory });
   } catch (error) {
@@ -116,17 +119,6 @@ app.get('/api/match-history/:playerId', async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to fetch match history' });
   }
 });
-
-// Career/Match History API endpoint by playerName (persistent across browser reloads)
-app.get('/api/match-history/by-name/:playerName', async (req, res) => {
-  try {
-    const { playerName } = req.params;
-    const limit = parseInt(req.query.limit) || 20;
-
-    const matchHistory = await MatchHistory
-      .find({ playerName: { $regex: new RegExp('^' + playerName.trim() + '$', 'i') } })
-      .sort({ matchDate: -1 })
-      .limit(limit);
 
     res.json({ success: true, data: matchHistory });
   } catch (error) {

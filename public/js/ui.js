@@ -65,7 +65,7 @@ class UIManager {
     // Top Right Menu & Settings
     this.btnHamburger = document.getElementById('btn-hamburger');
     this.dropdownMenu = document.getElementById('dropdown-menu');
-    this.menuOptCareer = document.getElementById('menu-opt-career');
+    this.btnCareerHeader = document.getElementById('btn-career-header');
     this.menuOptSettings = document.getElementById('menu-opt-settings');
     this.menuOptLeave = document.getElementById('menu-opt-leave');
     this.modalSettings = document.getElementById('modal-settings');
@@ -75,8 +75,6 @@ class UIManager {
     this.keybindsList = document.getElementById('keybinds-list');
 
     // Career Modal
-    this.btnNavCareer = document.getElementById('btn-nav-career');
-    this.btnTopCareer = document.getElementById('btn-top-career');
     this.modalCareer = document.getElementById('modal-career');
     this.btnCloseCareer = document.getElementById('btn-close-career');
     this.careerStatsSummary = document.getElementById('career-stats-summary');
@@ -230,19 +228,9 @@ class UIManager {
       });
     }
 
-    // Career Modal
-    if (this.menuOptCareer) {
-      this.menuOptCareer.addEventListener('click', () => {
-        this.showCareerModal();
-      });
-    }
-    if (this.btnNavCareer) {
-      this.btnNavCareer.addEventListener('click', () => {
-        this.showCareerModal();
-      });
-    }
-    if (this.btnTopCareer) {
-      this.btnTopCareer.addEventListener('click', () => {
+    // Career Modal - header button
+    if (this.btnCareerHeader) {
+      this.btnCareerHeader.addEventListener('click', () => {
         this.showCareerModal();
       });
     }
@@ -921,44 +909,30 @@ class UIManager {
     this.careerHistoryList.innerHTML = '<div class="loading-message">Retrieving operative career logs from Atlas...</div>';
 
     const playerName = (this.inputPlayerName?.value?.trim()) || localStorage.getItem('tactical_codename') || 'Viper_99';
-    const playerId = window.network?.playerId;
 
-    // Try name first, then playerId, then global
-    const fetchUrl = playerName ? `/api/match-history/by-name/${encodeURIComponent(playerName)}?limit=25`
-      : (playerId ? `/api/match-history/${playerId}?limit=25` : '/api/match-history-global?limit=25');
+    // Use playerName for persistent history across sessions
+    const fetchUrl = `/api/match-history/${encodeURIComponent(playerName)}?limit=25`;
 
-    fetch(fetchUrl)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success && data.data && data.data.length > 0) {
-          this.renderCareerHistory(data.data);
-        } else {
-          // If no personal records yet, try fetching global recent matches to preview
-          fetch('/api/match-history-global?limit=20')
-            .then(r => r.json())
-            .then(globalData => {
-              if (globalData.success && globalData.data && globalData.data.length > 0) {
-                this.renderCareerHistory(globalData.data);
-              } else {
-                this.careerHistoryList.innerHTML = `
-                  <div class="empty-career-msg">
-                    <span style="font-size: 36px;">📡</span>
-                    <span style="font-weight: 700; letter-spacing: 1px;">NO RECENT COMBAT LOGS FOUND</span>
-                    <span style="font-size: 13px; color: var(--text-muted);">Complete a match in active sector to record performance to MongoDB Atlas.</span>
-                  </div>
-                `;
-                this.careerStatsSummary.innerHTML = '';
-              }
-            })
-            .catch(() => {
-              this.careerHistoryList.innerHTML = '<div class="empty-message">No matches recorded yet. Play a game to record stats!</div>';
-            });
-        }
-      })
-      .catch(error => {
-        console.warn('Career fetch error:', error);
-        this.careerHistoryList.innerHTML = '<div class="error-message">Database syncing. Play a match to log career history.</div>';
-      });
+    try {
+      const response = await fetch(fetchUrl);
+      const data = await response.json();
+
+      if (data.success && data.data && data.data.length > 0) {
+        this.renderCareerHistory(data.data);
+      } else {
+        this.careerHistoryList.innerHTML = `
+          <div class="empty-career-msg">
+            <span style="font-size: 36px;">📡</span>
+            <span style="font-weight: 700; letter-spacing: 1px;">NO RECENT COMBAT LOGS FOUND</span>
+            <span style="font-size: 13px; color: var(--text-muted);">Complete a match in active sector to record performance to MongoDB Atlas.</span>
+          </div>
+        `;
+        this.careerStatsSummary.innerHTML = '';
+      }
+    } catch (error) {
+      console.error('Career fetch error:', error);
+      this.careerHistoryList.innerHTML = '<div class="error-message">Database syncing. Play a match to log career history.</div>';
+    }
   }
 
   renderCareerHistory(matches) {

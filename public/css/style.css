@@ -4,23 +4,23 @@
    ========================================================================== */
 
 :root {
-  --bg-dark: #0b1118;
-  --bg-slate: #0f1923;
-  --bg-card: #15222e;
-  --bg-hover: #1c2e3d;
-  --bg-glass: rgba(15, 25, 35, 0.88);
-  
-  --red-val: #ff4655;
-  --red-val-glow: rgba(255, 70, 85, 0.45);
-  --cyan-val: #00f0ff;
-  --cyan-val-glow: rgba(0, 240, 255, 0.45);
-  --gold-val: #ffde59;
-  
-  --text-primary: #ece8e1;
-  --text-muted: #8b978f;
-  --border-subtle: rgba(255, 255, 255, 0.12);
-  --border-active: rgba(255, 70, 85, 0.8);
-  
+  --bg-dark: #f5f7fa;
+  --bg-slate: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: #e8f0fe;
+  --bg-glass: rgba(255, 255, 255, 0.95);
+
+  --red-val: #e74c3c;
+  --red-val-glow: rgba(231, 76, 60, 0.3);
+  --cyan-val: #3498db;
+  --cyan-val-glow: rgba(52, 152, 219, 0.3);
+  --gold-val: #f39c12;
+
+  --text-primary: #2c3e50;
+  --text-muted: #7f8c8d;
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --border-active: rgba(52, 152, 219, 0.6);
+
   --font-display: 'Teko', sans-serif;
   --font-tech: 'Rajdhani', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -73,7 +73,7 @@ body, html {
    ========================================================================== */
 
 #screen-lobby {
-  background: radial-gradient(circle at 50% 30%, #172433 0%, #0b1118 70%);
+  background: radial-gradient(circle at 50% 30%, #e8f0fe 0%, #f5f7fa 70%);
 }
 
 .lobby-backdrop {
@@ -83,7 +83,7 @@ body, html {
   width: 100%;
   height: 100%;
   background: 
-    linear-gradient(rgba(15, 25, 35, 0.75), rgba(11, 17, 24, 0.95)),
+    linear-gradient(rgba(255, 255, 255, 0.85), rgba(245, 247, 250, 0.95)),
     radial-gradient(ellipse at 80% 20%, rgba(255, 70, 85, 0.08) 0%, transparent 60%),
     radial-gradient(ellipse at 20% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 60%);
   z-index: 1;
@@ -98,6 +98,19 @@ body, html {
   padding: 16px 36px;
   border-bottom: 1px solid var(--border-subtle);
   backdrop-filter: blur(8px);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.career-btn {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 8px 16px;
 }
 
 .logo-box {
@@ -161,7 +174,7 @@ body, html {
   background: var(--bg-glass);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(12px);
 }
 
@@ -284,7 +297,7 @@ input[type="text"]:focus {
 .quick-tips {
   margin-top: auto;
   background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   padding: 16px;
   border-radius: 4px;
 }
@@ -308,7 +321,7 @@ input[type="text"]:focus {
 kbd {
   display: inline-block;
   background: #253342;
-  color: #fff;
+  color: #2c3e50;
   border-radius: 3px;
   padding: 2px 5px;
   font-size: 11px;
@@ -342,7 +355,7 @@ kbd {
   font-family: var(--font-display);
   font-size: 21px;
   letter-spacing: 2px;
-  color: #ff4655;
+  color: #e74c3c;
   font-weight: 700;
   text-shadow: 0 0 10px rgba(255, 70, 85, 0.6);
 }
@@ -351,7 +364,7 @@ kbd {
   font-family: var(--font-display);
   font-size: 42px;
   letter-spacing: 4px;
-  color: #ffffff;
+  color: #2c3e50fff;
   font-weight: 700;
   line-height: 1;
   text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
@@ -360,7 +373,7 @@ kbd {
 .penalty-desc-text {
   font-size: 12px;
   line-height: 1.45;
-  color: #ece8e1;
+  color: #2c3e50;
 }
 
 .penalty-desc-text em {
@@ -453,13 +466,13 @@ kbd {
 
 .room-card-state-tag.lobby {
   background: rgba(0, 240, 255, 0.15);
-  color: #00f0ff;
+  color: #3498db;
   border: 1px solid rgba(0, 240, 255, 0.3);
 }
 
 .room-card-state-tag.in-game {
   background: rgba(255, 70, 85, 0.15);
-  color: #ff4655;
+  color: #e74c3c;
   border: 1px solid rgba(255, 70, 85, 0.3);
 }
 
@@ -479,7 +492,7 @@ kbd {
   color: var(--text-muted);
   border: 1px dashed var(--border-subtle);
   border-radius: 4px;
-  background: rgba(15, 25, 35, 0.4);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 /* Room Details & Agent Selection */
@@ -583,7 +596,7 @@ kbd {
 
 .ab-preview-item {
   font-size: 11px;
-  color: #adb9c5;
+  color: #5a6c7d;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -702,7 +715,7 @@ kbd {
 
 .btn-primary {
   background: var(--red-val);
-  color: #fff;
+  color: #2c3e50;
 }
 
 .btn-primary:hover {
@@ -712,7 +725,7 @@ kbd {
 
 .btn-secondary {
   background: #233446;
-  color: #fff;
+  color: #2c3e50;
   border: 1px solid var(--border-subtle);
 }
 
@@ -748,8 +761,8 @@ kbd {
 }
 
 .btn-team-switch:hover {
-  border-color: #fff;
-  color: #fff;
+  border-color: #2c3e50;
+  color: #2c3e50;
 }
 
 .btn-close {
@@ -760,7 +773,7 @@ kbd {
 }
 
 .btn-close:hover {
-  color: #fff;
+  color: #2c3e50;
 }
 
 .hidden {
@@ -798,7 +811,7 @@ kbd {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  background: linear-gradient(180deg, rgba(15, 25, 35, 0.95) 0%, rgba(15, 25, 35, 0.75) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 100%);
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 0 0 10px 10px;
   padding: 8px 32px;
@@ -852,7 +865,7 @@ kbd {
   font-family: var(--font-display);
   font-size: 48px;
   line-height: 1;
-  color: #fff;
+  color: #2c3e50;
 }
 
 .hud-spike-indicator {
@@ -905,7 +918,7 @@ kbd {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(15, 25, 35, 0.9);
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--border-subtle);
   padding: 6px 12px;
   border-radius: 2px;
@@ -1002,14 +1015,14 @@ kbd {
   transform: translate(-50%, -50%);
   font-family: var(--font-display);
   font-size: 32px;
-  color: #fff;
+  color: #2c3e50;
   font-weight: bold;
 }
 
 .prompt-text {
   font-size: 15px;
   letter-spacing: 2px;
-  color: #fff;
+  color: #2c3e50;
   font-weight: 700;
   text-shadow: 0 0 8px rgba(0,0,0,0.8);
 }
@@ -1020,7 +1033,7 @@ kbd {
   top: 80px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(15, 25, 35, 0.92);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
   padding: 8px 24px;
@@ -1047,7 +1060,7 @@ kbd {
 .credits-tag {
   font-family: var(--font-display);
   font-size: 26px;
-  color: #5eff8b;
+  color: #27ae60;
   letter-spacing: 1px;
 }
 
@@ -1080,7 +1093,7 @@ kbd {
 .vital-bar-track {
   width: 100%;
   height: 8px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;
@@ -1124,7 +1137,7 @@ kbd {
   position: relative;
   width: 62px;
   height: 62px;
-  background: rgba(15, 25, 35, 0.9);
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
   display: flex;
@@ -1166,7 +1179,7 @@ kbd {
   font-size: 10px;
   letter-spacing: 0.5px;
   text-align: center;
-  color: #fff;
+  color: #2c3e50;
   font-weight: 600;
   padding: 0 4px;
 }
@@ -1195,7 +1208,7 @@ kbd {
 }
 
 .w-slot.active {
-  color: #fff;
+  color: #2c3e50;
   background: rgba(255, 255, 255, 0.1);
   border-left: 2px solid var(--cyan-val);
 }
@@ -1221,7 +1234,7 @@ kbd {
   font-family: var(--font-display);
   font-size: 64px;
   line-height: 0.85;
-  color: #fff;
+  color: #2c3e50;
 }
 
 .ammo-sep {
@@ -1328,7 +1341,7 @@ kbd {
 .funds-val {
   font-family: var(--font-display);
   font-size: 42px;
-  color: #5eff8b;
+  color: #27ae60;
   line-height: 1;
 }
 
@@ -1390,7 +1403,7 @@ kbd {
   font-family: var(--font-tech);
   font-size: 18px;
   font-weight: 700;
-  color: #fff;
+  color: #2c3e50;
 }
 
 .shop-item-sub {
@@ -1493,8 +1506,8 @@ kbd {
 
 .btn-back {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: #2c3e50;
   font-size: 13px;
   letter-spacing: 1.5px;
   padding: 8px 16px;
@@ -1525,7 +1538,7 @@ kbd {
 .btn-hamburger {
   width: 44px;
   height: 44px;
-  background: rgba(15, 25, 35, 0.88);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
   cursor: pointer;
@@ -1555,7 +1568,7 @@ kbd {
 .hamburger-bar {
   width: 22px;
   height: 2px;
-  background-color: #ece8e1;
+  background-color: #2c3e50;
   border-radius: 1px;
   transition: all 0.2s;
 }
@@ -1603,7 +1616,7 @@ kbd {
   letter-spacing: 2px;
   color: var(--text-muted);
   padding: 8px 12px 4px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   margin-bottom: 4px;
   font-weight: 700;
 }
@@ -1666,7 +1679,7 @@ kbd {
   font-family: var(--font-display);
   font-size: 32px;
   letter-spacing: 2px;
-  color: #fff;
+  color: #2c3e50;
   line-height: 1;
 }
 
@@ -1703,7 +1716,7 @@ kbd {
 
 .keybind-row:hover {
   background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .keybind-label {
@@ -1715,7 +1728,7 @@ kbd {
 
 .keybind-key-btn {
   background: #202d3a;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   color: var(--gold-val);
   font-family: monospace;
   font-size: 13px;
@@ -1732,13 +1745,13 @@ kbd {
 .keybind-key-btn:hover {
   background: #2a3c4e;
   border-color: var(--cyan-val);
-  color: #fff;
+  color: #2c3e50;
 }
 
 .keybind-key-btn.listening {
   background: var(--red-val);
-  color: #fff;
-  border-color: #fff;
+  color: #2c3e50;
+  border-color: #2c3e50;
   animation: pulseRebind 0.8s infinite alternate;
   box-shadow: 0 0 12px var(--red-val-glow);
 }
@@ -1762,7 +1775,7 @@ kbd {
 
 .btn-danger {
   background: var(--red-val);
-  color: #fff;
+  color: #2c3e50;
   border: 1px solid #ff727d;
   box-shadow: 0 0 12px var(--red-val-glow);
 }
@@ -1818,7 +1831,7 @@ button:disabled, .btn:disabled {
 
 .penalty-sub {
   font-size: 13px;
-  color: #fff;
+  color: #2c3e50;
 }
 
 .penalty-sub strong {
@@ -1834,7 +1847,7 @@ button:disabled, .btn:disabled {
 .leader-penalty-box {
   background: rgba(255, 70, 85, 0.2);
   border: 1px solid var(--red-val);
-  color: #fff;
+  color: #2c3e50;
   padding: 6px 14px;
   border-radius: 2px;
   font-size: 13px;
@@ -1857,7 +1870,7 @@ button:disabled, .btn:disabled {
 
 .warning-modal-box {
   width: 580px;
-  background: #0f1923;
+  background: #f0f4f8;
   border: 1px solid rgba(255, 70, 85, 0.6);
   border-radius: 4px;
   padding: 28px 32px;
@@ -1945,7 +1958,7 @@ button:disabled, .btn:disabled {
 }
 
 .penalty-rule-notes li strong {
-  color: #fff;
+  color: #2c3e50;
 }
 
 .warning-footer {
@@ -1966,8 +1979,8 @@ button:disabled, .btn:disabled {
 
 .btn-bot-switch {
   background: #1e2c3a;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ece8e1;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: #2c3e50;
   font-family: var(--font-tech);
   font-size: 12px;
   font-weight: 700;
@@ -2038,7 +2051,7 @@ button:disabled, .btn:disabled {
 /* Danger button (abandon confirm) */
 .btn-danger {
   background: linear-gradient(135deg, #c0392b, #e74c3c);
-  color: #fff;
+  color: #2c3e50;
   border: none;
   font-weight: 700;
   letter-spacing: 1px;
@@ -2082,7 +2095,7 @@ button:disabled {
   gap: 2px;
 }
 .penalty-title {
-  color: #ff4655;
+  color: #e74c3c;
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 1px;
@@ -2148,7 +2161,7 @@ button:disabled {
 .warning-title {
   font-family: 'Teko', sans-serif;
   font-size: 22px;
-  color: #ff4655;
+  color: #e74c3c;
   letter-spacing: 2px;
   margin: 0;
 }
@@ -2182,7 +2195,7 @@ button:disabled {
 .penalty-duration-tag {
   font-family: 'Teko', sans-serif;
   font-size: 40px;
-  color: #ff4655;
+  color: #e74c3c;
   font-weight: 600;
   letter-spacing: 3px;
   line-height: 1;
@@ -2216,7 +2229,7 @@ button:disabled {
   display: flex;
   gap: 10px;
   padding: 16px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   justify-content: flex-end;
 }
 
@@ -2235,7 +2248,7 @@ button:disabled {
   border-radius: 3px;
   border: 1px solid rgba(0, 240, 255, 0.35);
   background: rgba(0, 240, 255, 0.07);
-  color: #00f0ff;
+  color: #3498db;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -2283,7 +2296,7 @@ button:disabled {
 }
 .afk-icon { font-size: 1.8rem; margin-bottom: 4px; }
 .afk-title {
-  color: #ff4655;
+  color: #e74c3c;
   font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: 3px;
@@ -2313,7 +2326,7 @@ button:disabled {
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 6px;
   padding: 9px 22px;
-  color: #ffffff;
+  color: #2c3e50fff;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -2346,7 +2359,7 @@ button:disabled {
 }
 .afk-kick-icon { font-size: 3.2rem; margin-bottom: 14px; }
 .afk-kick-title {
-  color: #ff4655;
+  color: #e74c3c;
   font-size: 1.5rem;
   font-weight: 900;
   letter-spacing: 4px;
@@ -2361,7 +2374,7 @@ button:disabled {
 .afk-kick-penalty {
   display: inline-block;
   margin-top: 8px;
-  color: #ff4655;
+  color: #e74c3c;
   font-weight: 700;
   font-size: 1rem;
 }
@@ -2468,7 +2481,7 @@ button:disabled {
 .btn-player-kick {
   background: rgba(255, 70, 85, 0.15);
   border: 1px solid rgba(255, 70, 85, 0.4);
-  color: #ff4655;
+  color: #e74c3c;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -2481,11 +2494,11 @@ button:disabled {
 
 .btn-player-kick:hover {
   background: rgba(255, 70, 85, 0.35);
-  border-color: #ff4655;
+  border-color: #e74c3c;
 }
 
 .roster-status.host-badge {
-  color: #ffde59;
+  color: #f39c12;
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 1px;
@@ -2495,7 +2508,7 @@ button:disabled {
    VALORANT-STYLE CAREER STATISTICS & MATCH HISTORY MODAL (Matching Image 3)
    ========================================================================= */
 .career-modal-box {
-  background: #0f1923;
+  background: #f0f4f8;
   border: 1px solid rgba(0, 240, 255, 0.25);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 240, 255, 0.1);
   border-radius: 6px;
@@ -2521,7 +2534,7 @@ button:disabled {
   font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: 2px;
-  color: #fff;
+  color: #2c3e50;
   margin: 0;
   display: flex;
   align-items: center;
@@ -2562,7 +2575,7 @@ button:disabled {
   font-size: 32px;
   font-weight: 700;
   line-height: 1;
-  color: #fff;
+  color: #2c3e50;
 }
 
 .stat-label {
@@ -2597,16 +2610,16 @@ button:disabled {
 }
 
 .valorant-career-card.is-victory {
-  background: linear-gradient(90deg, rgba(0, 180, 216, 0.18) 0%, rgba(20, 35, 50, 0.75) 45%, rgba(15, 25, 35, 0.95) 100%);
-  border-left-color: #00f0ff;
+  background: linear-gradient(90deg, rgba(0, 180, 216, 0.18) 0%, rgba(235, 245, 255, 0.75) 45%, rgba(255, 255, 255, 0.95) 100%);
+  border-left-color: #3498db;
   border-top: 1px solid rgba(0, 240, 255, 0.15);
   border-bottom: 1px solid rgba(0, 240, 255, 0.15);
   border-right: 1px solid rgba(0, 240, 255, 0.15);
 }
 
 .valorant-career-card.is-defeat {
-  background: linear-gradient(90deg, rgba(230, 57, 70, 0.18) 0%, rgba(35, 20, 30, 0.75) 45%, rgba(15, 25, 35, 0.95) 100%);
-  border-left-color: #ff4655;
+  background: linear-gradient(90deg, rgba(230, 57, 70, 0.18) 0%, rgba(245, 240, 245, 0.75) 45%, rgba(255, 255, 255, 0.95) 100%);
+  border-left-color: #e74c3c;
   border-top: 1px solid rgba(255, 70, 85, 0.15);
   border-bottom: 1px solid rgba(255, 70, 85, 0.15);
   border-right: 1px solid rgba(255, 70, 85, 0.15);
@@ -2665,13 +2678,13 @@ button:disabled {
 }
 
 .kda-numbers {
-  color: #fff;
+  color: #2c3e50;
   font-size: 15px;
 }
 
 .career-score-tag {
   font-size: 12px;
-  color: #5eff8b;
+  color: #27ae60;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -2690,19 +2703,19 @@ button:disabled {
 }
 
 .outcome-title.is-victory {
-  color: #00f0ff;
+  color: #3498db;
   text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
 
 .outcome-title.is-defeat {
-  color: #ff4655;
+  color: #e74c3c;
   text-shadow: 0 0 10px rgba(255, 70, 85, 0.5);
 }
 
 .outcome-rounds {
   font-size: 13px;
   font-weight: 600;
-  color: #ece8e1;
+  color: #2c3e50;
   letter-spacing: 1px;
   margin-top: 2px;
 }
@@ -2717,7 +2730,7 @@ button:disabled {
 .map-badge {
   font-size: 12px;
   font-weight: 700;
-  color: #ece8e1;
+  color: #2c3e50;
   letter-spacing: 1px;
 }
 
@@ -2733,15 +2746,15 @@ button:disabled {
   justify-content: center;
   gap: 10px;
   padding: 40px 20px;
-  color: #ece8e1;
+  color: #2c3e50;
   text-align: center;
 }
 
 /* Top Navigation Career Buttons */
 .nav-top-career-btn {
-  background: rgba(15, 25, 35, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(0, 240, 255, 0.35);
-  color: #00f0ff;
+  color: #3498db;
   font-family: inherit;
   font-size: 12px;
   font-weight: 700;
@@ -2758,7 +2771,7 @@ button:disabled {
 
 .nav-top-career-btn:hover {
   background: rgba(0, 240, 255, 0.15);
-  border-color: #00f0ff;
+  border-color: #3498db;
   box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
 }
 
