@@ -120,13 +120,6 @@ app.get('/api/match-history/:playerName', async (req, res) => {
   }
 });
 
-    res.json({ success: true, data: matchHistory });
-  } catch (error) {
-    console.error('Error fetching match history by name:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch match history' });
-  }
-});
-
 // Recent global match history
 app.get('/api/match-history-global', async (req, res) => {
   try {
