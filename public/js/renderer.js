@@ -1104,14 +1104,14 @@ class GameRenderer {
       const alpha = 0.5 + Math.sin(time) * 0.25;
 
       for (const b of MAP_DATA.barriers) {
-        const isAtt = b.team === 'attackers';
-        const color = isAtt ? `rgba(255, 70, 85, ${alpha})` : `rgba(0, 240, 255, ${alpha})`;
+        // Dark blue barriers as shown in the reference image
+        const color = `rgba(66, 135, 245, ${alpha})`;
 
         ctx.fillStyle = color;
         ctx.fillRect(b.x, b.y, b.w, b.h);
 
         // Laser edge line
-        ctx.strokeStyle = isAtt ? '#ff4655' : '#00f0ff';
+        ctx.strokeStyle = '#4287f5';
         ctx.lineWidth = 2;
         ctx.strokeRect(b.x, b.y, b.w, b.h);
 
